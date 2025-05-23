@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventory System</title>
+  
+  <style>
+    
+
+    body {
+      font-family: Arial, sans-serif;
+      background: url('yak.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.9);
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 20px;
+      text-align: center;
+    }
+
+    input, button {
+      width: 95%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    
+  </style>
+</head>
+<body>
+
+  
+  <div id="login-section" class="container">
+    <h2>Login to Inventory</h2>
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+    <p id="login-error" style="color:red; display:none;">Invalid username or password</p>
+  </div>
+
+  
+  <div id="inventory-section" class="container hidden">
+    <h2>Vanta Inventory Co.</h2>
+    <button onclick="signOut()">Sign Out</button>
+
+    <form id="inventory-form">
+      <input type="text" id="item-name" placeholder="Item Name" required>
+      <input type="number" id="item-quantity" placeholder="Quantity" required>
+      <button type="submit">Add Item</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Quantity</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="inventory-table"></tbody>
+    </table>
+  </div>
+
+
+
+<footer class="bg-white border-top py-4 mt-auto">
+  <div class="container text-center text-muted small">
+    © 2025 Customer Portal. All rights reserved.
+  </div>
+</footer>
+
+
+
+  <script>
+    const correctUsername = 'admin';
+    const correctPassword = '1234';
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const error = document.getElementById('login-error');
+
+      if (username === correctUsername && password === correctPassword) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('inventory-section').classList.remove('hidden');
+        error.style.display = 'none';
+        loadInventory(); 
+      } else {
+        error.style.display = 'block';
+      }
+    }
+
+    function signOut() {
+      document.getElementById('inventory-section').classList.add('hidden');
+      document.getElementById('login-section').classList.remove('hidden');
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('inventory-table').innerHTML = '';
+    }
+
+    const form = document.getElementById('inventory-form');
+    const table = document.getElementById('inventory-table');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const itemName = document.getElementById('item-name').value;
+      const quantity = document.getElementById('item-quantity').value;
+
+      const item = { name: itemName, quantity: quantity };
+      addItemToTable(item);
+      saveItem(item);
+
+      form.reset();
+    });
+
+    function addItemToTable(item) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.quantity}</td>
+        <td><button onclick="deleteRow(this, '${item.name}')">Delete</button></td>
+      `;
+      table.appendChild(row);
+    }
+
+    function deleteRow(button, itemName) {
+      button.parentElement.parentElement.remove();
+      removeItem(itemName);
+    }
+
+    function saveItem(item) {
+      let items = JSON.parse(localStorage.getItem('inventory')) || [];
+      items.push(item);
+      localStorage.setItem('inventory', JSON.stringify(items));
+    }
+
+    function removeItem(nameToRemove) {
+      let items = JSON.parse(localStorage.getItem('inventory')) || [];
+      items = items.filter(item => item.name !== nameToRemove);
+      localStorage.setItem('inventory', JSON.stringify(items));
+    }
+
+    function loadInventory() {
+      const savedItems = JSON.parse(localStorage.getItem('inventory')) || [];
+      table.innerHTML = ''; 
+      savedItems.forEach(addItemToTable);
+    }
+  </script>
+</body>
+</html>
